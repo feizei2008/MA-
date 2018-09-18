@@ -1,0 +1,20 @@
+import tushare as ts
+import talib
+import numpy as np
+import pandas as pd
+import matplotlib as plt; plt.use('Qt4Agg')
+
+his = ts.get_hist_data('000001')
+MA5 = talib.MA(his.close.values,5)
+MA10 = talib.MA(his.close.values,10)
+
+idx = MA5 > MA10
+xor_idx = idx[1:] ^ idx[:-1] & idx[1:]
+print idx[1:] ^ idx[:-1]
+cross_idx = np.where(xor_idx)[0] + 1
+print cross_idx[-10:]
+
+cross_days = his.iloc[cross_idx]
+print cross_days.head().index
+cross_days[['open','ma5','ma10']].plot()
+plt.pyplot.show()
