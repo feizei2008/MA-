@@ -2,15 +2,15 @@ import tushare as ts
 import talib
 import numpy as np
 import pandas as pd
-import matplotlib as plt; plt.use('Qt4Agg')
+import matplotlib as plt; plt.use('Qt4Agg')#因PyQt5有部分bug
 
 his = ts.get_hist_data('000001')
 MA5 = talib.MA(his.close.values,5)
 MA10 = talib.MA(his.close.values,10)
 
-idx = MA5 > MA10
+idx = MA5 > MA10 # idx是元素为True（1）和False（0）的numpy array
 xor_idx = idx[1:] ^ idx[:-1] & idx[1:]
-print idx[1:] ^ idx[:-1]
+
 cross_idx = np.where(xor_idx)[0] + 1
 print cross_idx[-10:]
 
@@ -18,3 +18,24 @@ cross_days = his.iloc[cross_idx]
 print cross_days.head().index
 cross_days[['open','ma5','ma10']].plot()
 plt.pyplot.show()
+
+'''
+In [1]: import numpy as np
+
+In [2]: arr = np.array([1,0,0,1,0,1,0,0,1,1,1]) #1,0即是True,False,1为MA5>MA10,0为MA5<MA10
+
+In [3]: arr[1:] 
+Out[3]: array([0, 0, 1, 0, 1, 0, 0, 1, 1, 1]) # 不要第一个
+In [4]: arr[:-1]
+Out[4]: array([1, 0, 0, 1, 0, 1, 0, 0, 1, 1]) # 不要最后一个
+In [5]: arr[1:] ^ arr[:-1]
+Out[5]: array([1, 0, 1, 1, 1, 1, 0, 1, 0, 0]) # ^运算符的计算结果，相同为False，不同为True，相当于相邻两天比较，状态变化为True不变为False
+
+In [6]: arr[1:] ^ arr[:-1] & arr[1:]
+Out[6]: array([0, 0, 1, 0, 1, 0, 0, 1, 0, 0]) # &运算符的计算结果，只要有一个为真结果就为真，结合上一步运算，得出状态变化为MA5>MA10的日期
+
+In [9]: k = arr[1:] ^ arr[:-1] & arr[1:]
+
+In [10]: np.where(k)[0] + 1
+Out[10]: array([3, 5, 8]) # where方法+1得出第几天
+'''
